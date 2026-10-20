@@ -153,7 +153,7 @@ Millions of patients suffering from chronic conditions (hypertension, diabetes, 
 Run the entire multi-tier system with a single command:
 
 ```bash
-git clone https://github.com/Aaditya514/auto-meds.git
+git clone https://github.com/Lakshya-goyal/auto-meds.git
 cd auto-meds
 docker compose up --build
 ```
@@ -339,9 +339,9 @@ The platform follows a persona-driven, clinical-safety first engineering roadmap
 
 ## 👨‍💻 Author
 
-**Aaditya Aanand**
-- GitHub: [@Aaditya514](https://github.com/Aaditya514)
-- Repository: [https://github.com/Aaditya514/auto-meds](https://github.com/Aaditya514/auto-meds)
+**Lakshya Goyal**
+- GitHub: [@Lakshya-goyal](https://github.com/Lakshya-goyal)
+- Repository: [https://github.com/Lakshya-goyal/auto-meds](https://github.com/Lakshya-goyal/auto-meds)
 
 ---
 

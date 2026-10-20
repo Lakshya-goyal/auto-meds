@@ -25,8 +25,8 @@ class EmailServiceTest {
     void testSendOrderConfirmationEmail() {
         User patient = new User();
         patient.setId(1L);
-        patient.setName("Aaditya Aanand");
-        patient.setEmail("aaditya.aanand@intellectdesign.com");
+        patient.setName("Lakshya Goyal");
+        patient.setEmail("lakshya.goyal@example.com");
 
         Order order = new Order();
         order.setId(101L);
@@ -44,8 +44,8 @@ class EmailServiceTest {
     void testSendOrderStatusUpdateEmail() {
         User patient = new User();
         patient.setId(1L);
-        patient.setName("Aaditya Aanand");
-        patient.setEmail("aaditya.aanand@intellectdesign.com");
+        patient.setName("Lakshya Goyal");
+        patient.setEmail("lakshya.goyal@example.com");
 
         Order order = new Order();
         order.setId(101L);
@@ -59,8 +59,8 @@ class EmailServiceTest {
     void testSendSubscriptionRefillEmail() {
         User patient = new User();
         patient.setId(1L);
-        patient.setName("Aaditya Aanand");
-        patient.setEmail("aaditya.aanand@intellectdesign.com");
+        patient.setName("Lakshya Goyal");
+        patient.setEmail("lakshya.goyal@example.com");
 
         Order order = new Order();
         order.setId(102L);
@@ -75,8 +75,8 @@ class EmailServiceTest {
     void testSendSubscriptionNotificationEmail() {
         User patient = new User();
         patient.setId(1L);
-        patient.setName("Aaditya Aanand");
-        patient.setEmail("aaditya.aanand@intellectdesign.com");
+        patient.setName("Lakshya Goyal");
+        patient.setEmail("lakshya.goyal@example.com");
 
         assertDoesNotThrow(() -> emailService.sendSubscriptionNotificationEmail(patient, "Clarification Required", "Please upload a clearer prescription."));
     }

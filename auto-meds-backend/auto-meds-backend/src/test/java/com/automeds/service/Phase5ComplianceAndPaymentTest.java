@@ -58,8 +58,8 @@ class Phase5ComplianceAndPaymentTest {
 
         patient = new User();
         patient.setId(1L);
-        patient.setName("Aaditya Test");
-        patient.setEmail("aaditya@test.com");
+        patient.setName("Lakshya Goyal");
+        patient.setEmail("lakshya@test.com");
         patient.setPhone("+919876543210");
 
         order = new Order();
@@ -131,7 +131,7 @@ class Phase5ComplianceAndPaymentTest {
     void testProcessPayment_UPIOnlinePayment() {
         PaymentRequestDTO request = new PaymentRequestDTO();
         request.setPaymentMethod("UPI");
-        request.setUpiId("aaditya@okaxis");
+        request.setUpiId("lakshya@okaxis");
 
         PaymentResponseDTO response = paymentService.processPayment(101L, request);
 

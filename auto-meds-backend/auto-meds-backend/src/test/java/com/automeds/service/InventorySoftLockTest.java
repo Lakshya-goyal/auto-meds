@@ -81,8 +81,8 @@ class InventorySoftLockTest {
 
         patient = new User();
         patient.setId(1L);
-        patient.setName("Aaditya Aanand");
-        patient.setEmail("aaditya@example.com");
+        patient.setName("Lakshya Goyal");
+        patient.setEmail("lakshya@example.com");
 
         medicine = new Medicine();
         medicine.setId(10L);
