@@ -1,0 +1,109 @@
+<nav class="navbar navbar-expand-lg navbar-pharma sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold d-flex align-items-center" routerLink="/">
+      <i class="bi bi-prescription2 text-primary fs-3 me-2"></i>
+      <span class="brand-gradient fs-4">Auto-Meds</span>
+      <span *ngIf="authService.isAdmin()" class="badge text-uppercase ms-2 fw-semibold" style="background-color: #0f172a; color: #f8fafc; font-size: 0.7rem; letter-spacing: 0.06em; padding: 0.35rem 0.65rem; border-radius: 6px;">Pharmacist Portal</span>
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Patient Nav Links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" *ngIf="authService.isPatient()">
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/home" routerLinkActive="active"><i class="bi bi-house-door me-1"></i> Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/medicines" routerLinkActive="active"><i class="bi bi-capsule me-1"></i> Medicines</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/subscriptions" routerLinkActive="active"><i class="bi bi-arrow-repeat me-1"></i> Subscriptions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/orders" routerLinkActive="active"><i class="bi bi-box-seam me-1"></i> Orders</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/caregiver" routerLinkActive="active"><i class="bi bi-people me-1"></i> Caregivers</a>
+        </li>
+      </ul>
+
+      <!-- Admin Nav Links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" *ngIf="authService.isAdmin()">
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/admin/dashboard" routerLinkActive="active"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/admin/medicines" routerLinkActive="active"><i class="bi bi-capsule me-1"></i> Medicines</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/admin/inventory" routerLinkActive="active"><i class="bi bi-boxes me-1"></i> Inventory</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/admin/subscription-requests" routerLinkActive="active"><i class="bi bi-file-earmark-medical me-1"></i> Subscriptions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/admin/orders" routerLinkActive="active"><i class="bi bi-receipt me-1"></i> Orders</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/admin/users" routerLinkActive="active"><i class="bi bi-people me-1"></i> Patients</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-medium" routerLink="/admin/audit-logs" routerLinkActive="active"><i class="bi bi-shield-check me-1"></i> Audit Logs</a>
+        </li>
+      </ul>
+
+      <!-- Right Nav Buttons -->
+      <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Patient Cart Icon -->
+        <li class="nav-item me-3" *ngIf="authService.isPatient()">
+          <a class="nav-link position-relative cart-icon-btn p-0" routerLink="/cart" title="Shopping Cart">
+            <i class="bi bi-cart3 fs-5"></i>
+            <span *ngIf="cartItemCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
+              {{ cartItemCount }}
+            </span>
+          </a>
+        </li>
+
+        <!-- Logged Out Actions -->
+        <ng-container *ngIf="!authService.isLoggedIn()">
+          <li class="nav-item me-2">
+            <a class="btn btn-outline-primary rounded-pill px-4 fw-semibold" routerLink="/login/patient">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-pharma-primary rounded-pill px-4" routerLink="/register">Register</a>
+          </li>
+        </ng-container>
+
+        <!-- Logged In User Dropdown -->
+        <li class="nav-item dropdown" *ngIf="authService.isLoggedIn()">
+          <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 py-1 px-2 rounded-3" href="#" role="button" data-bs-toggle="dropdown">
+            <div class="avatar-pharma avatar-sm avatar-interactive" [ngClass]="authService.isPharmacist() ? 'avatar-pharmacist' : 'avatar-patient'">
+              {{ currentUser?.name?.charAt(0)?.toUpperCase() || 'U' }}
+              <span class="avatar-status-dot avatar-status-online" title="Session Active"></span>
+            </div>
+            <div class="d-none d-md-flex flex-column text-start lh-1">
+              <span class="fw-semibold text-dark" style="font-size: 0.88rem;">{{ currentUser?.name }}</span>
+              <span class="text-muted" style="font-size: 0.72rem;">{{ authService.isPharmacist() ? 'Pharmacist' : 'Patient' }}</span>
+            </div>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+            <li class="dropdown-header">Logged in as <strong>{{ currentUser?.email }}</strong></li>
+            <li><hr class="dropdown-divider"></li>
+            <li *ngIf="authService.isPatient()">
+              <a class="dropdown-link dropdown-item" routerLink="/profile"><i class="bi bi-person me-2"></i> Profile</a>
+            </li>
+            <li *ngIf="authService.isPatient()">
+              <a class="dropdown-link dropdown-item" routerLink="/caregiver"><i class="bi bi-people me-2"></i> Caregiver Access</a>
+            </li>
+            <li>
+              <button class="dropdown-item text-danger fw-medium" (click)="logout()"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

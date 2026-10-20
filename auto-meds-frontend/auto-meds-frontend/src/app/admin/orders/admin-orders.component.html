@@ -1,0 +1,193 @@
+<div class="container-fluid py-4 px-lg-5">
+  <!-- Header & Toolbar -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+    <div>
+      <h3 class="fw-bold mb-1 text-dark">
+        <i class="bi bi-receipt text-primary me-2"></i>Pharmacist Orders Desk & Fulfillment
+      </h3>
+      <p class="text-muted small mb-0">
+        Review & transition delivery statuses for One-Time purchases and automated 5-day soft-locked Chronic Refills.
+      </p>
+    </div>
+
+    <!-- Search & Quick Metrics -->
+    <div class="d-flex align-items-center gap-2">
+      <div class="input-group input-group-sm" style="min-width: 260px;">
+        <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-search"></i></span>
+        <input 
+          type="text" 
+          class="form-control border-start-0 ps-0" 
+          placeholder="Search by order ID, patient, type..." 
+          [(ngModel)]="searchQuery">
+        <button *ngIf="searchQuery" (click)="searchQuery = ''" class="btn btn-outline-secondary" type="button">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+
+      <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold">
+        {{ filteredOrders.length }} Orders
+      </span>
+    </div>
+  </div>
+
+  <!-- Status Filter Toolbar -->
+  <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+    <button 
+      (click)="statusFilter = 'ALL'" 
+      class="btn btn-sm rounded-pill fw-semibold"
+      [class.btn-primary]="statusFilter === 'ALL'"
+      [class.btn-outline-secondary]="statusFilter !== 'ALL'">
+      All Orders
+    </button>
+    <button 
+      (click)="statusFilter = 'PENDING'" 
+      class="btn btn-sm rounded-pill fw-semibold"
+      [class.btn-warning]="statusFilter === 'PENDING'"
+      [class.btn-outline-secondary]="statusFilter !== 'PENDING'">
+      Pending
+    </button>
+    <button 
+      (click)="statusFilter = 'APPROVED'" 
+      class="btn btn-sm rounded-pill fw-semibold"
+      [class.btn-info]="statusFilter === 'APPROVED'"
+      [class.btn-outline-secondary]="statusFilter !== 'APPROVED'">
+      Approved
+    </button>
+    <button 
+      (click)="statusFilter = 'PACKED'" 
+      class="btn btn-sm rounded-pill fw-semibold"
+      [class.btn-primary]="statusFilter === 'PACKED'"
+      [class.btn-outline-secondary]="statusFilter !== 'PACKED'">
+      Packed
+    </button>
+    <button 
+      (click)="statusFilter = 'DISPATCHED'" 
+      class="btn btn-sm rounded-pill fw-semibold"
+      [class.btn-primary]="statusFilter === 'DISPATCHED'"
+      [class.btn-outline-secondary]="statusFilter !== 'DISPATCHED'">
+      Dispatched
+    </button>
+    <button 
+      (click)="statusFilter = 'DELIVERED'" 
+      class="btn btn-sm rounded-pill fw-semibold"
+      [class.btn-success]="statusFilter === 'DELIVERED'"
+      [class.btn-outline-secondary]="statusFilter !== 'DELIVERED'">
+      Delivered
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="message" class="alert alert-success alert-dismissible fade show mb-4 shadow-sm">
+    <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+    <button type="button" class="btn-close" (click)="message = ''"></button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted small mt-2">Loading orders...</p>
+  </div>
+
+  <!-- Orders Table -->
+  <div *ngIf="!loading && filteredOrders.length > 0" class="card card-pharma p-0 bg-white shadow-sm overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-sticky align-middle table-hover mb-0">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Order ID</th>
+            <th style="width: 140px;">Type</th>
+            <th>Patient Details</th>
+            <th class="text-end" style="width: 130px;">Total Amount</th>
+            <th>Prescription Verification</th>
+            <th>Date &amp; Payment</th>
+            <th>Current Status</th>
+            <th class="text-end" style="width: 190px;">Update Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders">
+            <td><span class="cell-id">#{{ order.id }}</span></td>
+            <td>
+              <span class="badge" [ngClass]="order.orderType === 'SUBSCRIPTION_REFILL' ? 'bg-teal text-success bg-opacity-10 border border-success' : 'bg-primary bg-opacity-10 text-primary border border-primary'">
+                {{ order.orderType }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar-pharma avatar-sm avatar-patient">
+                  {{ (order.patientName ? order.patientName.charAt(0) : 'P') | uppercase }}
+                </div>
+                <div>
+                  <div class="fw-bold text-dark">{{ order.patientName }}</div>
+                  <span class="text-muted small">{{ order.patientEmail }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="text-end cell-currency">₹{{ order.totalAmount }}</td>
+            <td>
+              <div *ngIf="order.prescriptionId" class="d-flex flex-column gap-1">
+                <button (click)="viewPrescription(order.prescriptionId)" class="btn btn-xs btn-outline-primary py-1 px-2 fw-semibold" style="font-size: 11px;">
+                  <i class="bi bi-file-earmark-medical me-1"></i> View Doctor Rx #{{ order.prescriptionId }}
+                </button>
+                <div class="d-flex gap-1 flex-wrap">
+                  <span class="badge bg-info bg-opacity-10 text-primary border border-info" style="font-size: 10px;">
+                    <i class="bi bi-shield-check me-1"></i>Four-Eyes Verified
+                  </span>
+                  <span *ngIf="order.isBridgeSupply" class="badge bg-danger bg-opacity-10 text-danger border border-danger" style="font-size: 10px;">
+                    <i class="bi bi-shield-plus me-1"></i>Bridge Supply
+                  </span>
+                </div>
+              </div>
+              <span *ngIf="!order.prescriptionId" class="text-muted small">OTC (No Rx Required)</span>
+            </td>
+            <td class="small text-muted">
+              <div>{{ order.orderDate | date:'mediumDate' }}</div>
+              <div class="mt-1">
+                <span class="badge" [ngClass]="order.paymentStatus === 'PAID' ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-warning bg-opacity-10 text-dark border border-warning'" style="font-size: 10px;">
+                  {{ order.paymentStatus || 'PENDING' }}
+                </span>
+                <span *ngIf="order.paymentMethod" class="badge bg-light text-secondary border ms-1" style="font-size: 10px;">
+                  {{ order.paymentMethod }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="badge mb-1 d-inline-block" [ngClass]="{
+                'badge-active': order.orderStatus === 'DELIVERED',
+                'badge-pending': order.orderStatus === 'PENDING' || order.orderStatus === 'APPROVED' || order.orderStatus === 'PACKED',
+                'badge-approved': order.orderStatus === 'DISPATCHED' || order.orderStatus === 'OUT_FOR_DELIVERY',
+                'badge-rejected': order.orderStatus === 'CANCELLED' || order.orderStatus === 'REJECTED'
+              }">
+                {{ order.orderStatus }}
+              </span>
+              <div>
+                <button (click)="viewDispensingSlip(order.id)" class="btn btn-xs btn-outline-success py-0 px-2 fw-semibold" style="font-size: 10px;" title="View official physical dispensing slip with doorstep verification QR code">
+                  <i class="bi bi-qr-code me-1"></i> Slip &amp; QR
+                </button>
+              </div>
+            </td>
+            <td class="cell-actions">
+              <select [ngModel]="order.orderStatus" (ngModelChange)="updateStatus(order, $event)" class="form-select form-select-sm fw-semibold">
+                <option *ngFor="let opt of statusOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredOrders.length === 0" class="text-center py-5 bg-white rounded-3 shadow-sm border p-4">
+    <i class="bi bi-box-seam text-muted display-4 mb-3 d-block"></i>
+    <h5 class="fw-bold text-dark">No orders found.</h5>
+    <p class="text-muted small mb-0">No orders match the filter "{{ statusFilter }}" or search query "{{ searchQuery }}".</p>
+  </div>
+</div>
+
+<!-- Dispensing Slip Modal Component -->
+<app-dispensing-slip-modal
+  [slip]="selectedDispensingSlip"
+  [isOpen]="showDispensingModal"
+  (close)="closeDispensingModal()"
+></app-dispensing-slip-modal>

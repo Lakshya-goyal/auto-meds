@@ -1,0 +1,237 @@
+package com.automeds.controller;
+
+import com.automeds.dto.CaregiverDTO;
+import com.automeds.dto.OrderDTO;
+import com.automeds.security.UserPrincipal;
+import com.automeds.service.CaregiverService;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * CaregiverController — Phase 6 REST API
+ *
+ * Exposes endpoints for the caregiver proxy feature:
+ *
+ * Patient endpoints:
+ *   POST   /api/caregiver/invite            → Invite a caregiver by email
+ *   GET    /api/caregiver/my-caregivers     → List all caregivers for logged-in patient
+ *   DELETE /api/caregiver/{accessId}/revoke → Revoke a caregiver's access
+ *
+ * Caregiver endpoints:
+ *   POST /api/caregiver/respond             → Accept or decline a pending invitation
+ *   GET  /api/caregiver/my-patients         → List delegated patients the caregiver manages
+ *   POST /api/caregiver/pay-on-behalf       → Make a payment for a patient's order
+ *
+ * Webhook endpoint (SMS / WhatsApp gateway):
+ *   POST /api/caregiver/whatsapp-command    → Parse CONFIRM/SKIP/SNOOZE/STATUS commands
+ *
+ * Security: All endpoints require authentication. Ownership verification
+ * is enforced in CaregiverService — never from the client-supplied payload.
+ */
+@RestController
+@RequestMapping("/api/caregiver")
+public class CaregiverController {
+
+    private final CaregiverService caregiverService;
+
+    public CaregiverController(CaregiverService caregiverService) {
+        this.caregiverService = caregiverService;
+    }
+
+    // ── Patient Endpoints ─────────────────────────────────────────────────────
+
+    /**
+     * POST /api/caregiver/invite
+     * Allows a PATIENT to invite a registered user to be their caregiver.
+     */
+    @PostMapping("/invite")
+    public ResponseEntity<CaregiverDTO.CaregiverLinkResponse> inviteCaregiver(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestBody CaregiverDTO.InviteRequest request) {
+
+        CaregiverDTO.CaregiverLinkResponse response =
+                caregiverService.inviteCaregiver(currentUser.getId(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * GET /api/caregiver/my-caregivers
+     * Returns all caregiver relationships (PENDING, ACTIVE, REVOKED) for the logged-in patient.
+     */
+    @GetMapping("/my-caregivers")
+    public ResponseEntity<List<CaregiverDTO.CaregiverLinkResponse>> getMyCaregivers(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        return ResponseEntity.ok(caregiverService.getCaregiversForPatient(currentUser.getId()));
+    }
+
+    /**
+     * DELETE /api/caregiver/{accessId}/revoke
+     * Allows a PATIENT to revoke an existing caregiver's access immediately.
+     */
+    @DeleteMapping("/{accessId}/revoke")
+    public ResponseEntity<Map<String, String>> revokeCaregiver(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PathVariable Long accessId) {
+
+        caregiverService.revokeCaregiver(currentUser.getId(), accessId);
+        return ResponseEntity.ok(Map.of(
+                "message", "Caregiver access revoked successfully.",
+                "accessId", String.valueOf(accessId)
+        ));
+    }
+
+    // ── Caregiver Endpoints ───────────────────────────────────────────────────
+
+    /**
+     * POST /api/caregiver/respond
+     * Allows a caregiver (invited user) to ACCEPT or DECLINE a pending invitation.
+     */
+    @PostMapping("/respond")
+    public ResponseEntity<CaregiverDTO.CaregiverLinkResponse> respondToInvitation(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestBody CaregiverDTO.RespondRequest request) {
+
+        CaregiverDTO.CaregiverLinkResponse response =
+                caregiverService.respondToInvitation(currentUser.getId(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * GET /api/caregiver/my-patients
+     * Returns all active patient delegations for the logged-in caregiver.
+     */
+    @GetMapping("/my-patients")
+    public ResponseEntity<List<CaregiverDTO.DelegatedPatientResponse>> getMyPatients(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        return ResponseEntity.ok(caregiverService.getDelegatedPatients(currentUser.getId()));
+    }
+
+    /**
+     * GET /api/caregiver/pending-invitations
+     * Returns all incoming pending caregiver invitations for the logged-in user.
+     */
+    @GetMapping("/pending-invitations")
+    public ResponseEntity<List<CaregiverDTO.PendingInvitationResponse>> getPendingInvitations(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        return ResponseEntity.ok(caregiverService.getPendingInvitations(currentUser.getId()));
+    }
+
+    /**
+     * GET /api/caregiver/patient/{patientId}/pending-orders
+     * Returns pending orders for a delegated patient so the caregiver can pay on their behalf.
+     */
+    @GetMapping("/patient/{patientId}/pending-orders")
+    public ResponseEntity<List<OrderDTO>> getPatientPendingOrders(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PathVariable Long patientId) {
+
+        return ResponseEntity.ok(caregiverService.getPendingOrdersForDelegatedPatient(currentUser.getId(), patientId));
+    }
+
+    /**
+     * POST /api/caregiver/pay-on-behalf
+     * Allows a caregiver with PAY_ON_BEHALF permission to pay for a patient's pending order.
+     */
+    @PostMapping("/pay-on-behalf")
+    public ResponseEntity<Map<String, String>> payOnBehalf(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestBody CaregiverDTO.ProxyPaymentRequest request) {
+
+        String result = caregiverService.payOnBehalf(currentUser.getId(), request);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    // ── WhatsApp / SMS Webhook ────────────────────────────────────────────────
+
+    /**
+     * POST /api/caregiver/whatsapp-command (Form-Urlencoded)
+     * Inbound webhook for Twilio WhatsApp sandbox and SMS gateways.
+     * Receives form parameters (From, Body, WaId, MessageSid) and returns TwiML XML
+     * so Twilio automatically sends the reply back to the user's phone on WhatsApp.
+     */
+    @PostMapping(
+            value = "/whatsapp-command",
+            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, "application/x-www-form-urlencoded;charset=UTF-8"},
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE, "text/xml;charset=UTF-8"}
+    )
+    public ResponseEntity<String> handleTwilioWhatsAppWebhook(@RequestParam Map<String, String> params) {
+        String from = params.get("From");
+        if (from == null) from = params.get("from");
+        if (from == null) from = params.get("WaId");
+
+        String body = params.get("Body");
+        if (body == null) body = params.get("body");
+
+        CaregiverDTO.WhatsAppCommandRequest req = new CaregiverDTO.WhatsAppCommandRequest();
+        req.setFrom(from);
+        req.setBody(body);
+        req.setMessageSid(params.get("MessageSid"));
+
+        String reply = caregiverService.processWhatsAppCommand(req);
+
+        String xmlSafeReply = escapeXml(reply);
+        String twiml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<Response>\n"
+                + "    <Message>" + xmlSafeReply + "</Message>\n"
+                + "</Response>";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/xml;charset=UTF-8"))
+                .body(twiml);
+    }
+
+    /**
+     * POST /api/caregiver/whatsapp-command (JSON)
+     * Inbound webhook for JSON clients (in-browser simulator, REST clients).
+     */
+    @PostMapping(
+            value = "/whatsapp-command",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Map<String, String>> handleJsonWhatsAppCommand(
+            @RequestBody CaregiverDTO.WhatsAppCommandRequest request) {
+
+        String reply = caregiverService.processWhatsAppCommand(request);
+        return ResponseEntity.ok(Map.of(
+                "reply", reply,
+                "from", request.getFrom() != null ? request.getFrom() : "unknown"
+        ));
+    }
+
+    private String escapeXml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
+    }
+
+    /**
+     * GET /api/caregiver/accept/{accessId}
+     * One-click accept endpoint linked from the invitation email.
+     * The logged-in user becomes the caregiver for this access record.
+     */
+    @GetMapping("/accept/{accessId}")
+    public ResponseEntity<CaregiverDTO.CaregiverLinkResponse> acceptViaEmailLink(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PathVariable Long accessId) {
+
+        CaregiverDTO.RespondRequest req = new CaregiverDTO.RespondRequest();
+        req.setAccessId(accessId);
+        req.setAction("ACCEPT");
+
+        CaregiverDTO.CaregiverLinkResponse response =
+                caregiverService.respondToInvitation(currentUser.getId(), req);
+        return ResponseEntity.ok(response);
+    }
+}

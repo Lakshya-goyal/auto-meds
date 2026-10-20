@@ -1,0 +1,146 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Medicine } from '../models/medicine.model';
+import { Subscription } from '../models/subscription.model';
+import { Order } from '../models/order.model';
+import { User } from '../models/user.model';
+
+export interface AdminDashboardMetrics {
+  totalPatients: number;
+  totalMedicines: number;
+  activeSubscriptions: number;
+  pendingRequests: number;
+  upcomingRefills: number;
+  pendingOrders: number;
+  lowStockMedicines: number;
+  outOfStockMedicines: number;
+  deficitSubscriptions?: number;
+  procurementAlerts?: number;
+}
+
+export interface ProcurementAlert {
+  medicineId: number;
+  medicineName: string;
+  brandName: string;
+  composition: string;
+  strength: string;
+  price: number;
+  stockQuantity: number;
+  reservedQuantity: number;
+  availableQuantity: number;
+  reorderThreshold: number;
+  suggestedReorderPackSize: number;
+  deficitSubscriptionsCount: number;
+  urgency: 'CRITICAL_STOCKOUT' | 'DEFICIT_QUEUED' | 'LOW_STOCK';
+}
+
+export interface DeficitSubscription {
+  subscriptionId: number;
+  patientId: number;
+  patientName: string;
+  patientEmail: string;
+  medicineId: number;
+  medicineName: string;
+  quantityNeeded: number;
+  currentAvailableStock: number;
+  nextRefillDate: string;
+  daysUntilRefill: number;
+}
+
+export interface RestockRequest {
+  medicineId: number;
+  quantity: number;
+  batchNumber?: string;
+  expiryDate?: string;
+}
+
+export interface RestockResponse {
+  medicineId: number;
+  medicineName: string;
+  previousStock: number;
+  newStock: number;
+  previousAvailable: number;
+  newAvailable: number;
+  deficitsResolvedCount: number;
+  message: string;
+}
+
+import { API_BASE } from '../constants/api.config';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AdminService {
+  private apiUrl = `${API_BASE}/admin`;
+
+  constructor(private http: HttpClient) {}
+
+  getDashboardMetrics(): Observable<AdminDashboardMetrics> {
+    return this.http.get<AdminDashboardMetrics>(`${this.apiUrl}/dashboard`);
+  }
+
+  getPendingSubscriptionRequests(): Observable<Subscription[]> {
+    return this.http.get<Subscription[]>(`${this.apiUrl}/subscription-requests`);
+  }
+
+  approveSubscription(id: number, assignments: any[]): Observable<Subscription[]> {
+    return this.http.put<Subscription[]>(`${this.apiUrl}/subscriptions/${id}/approve`, assignments);
+  }
+
+  rejectSubscription(id: number, reason?: string): Observable<Subscription> {
+    return this.http.put<Subscription>(`${this.apiUrl}/subscriptions/${id}/reject`, { reason });
+  }
+
+  requestClarification(id: number, message: string): Observable<Subscription> {
+    return this.http.put<Subscription>(`${this.apiUrl}/subscriptions/${id}/clarification`, { message });
+  }
+
+  createMedicine(medicine: Partial<Medicine>): Observable<Medicine> {
+    return this.http.post<Medicine>(`${this.apiUrl}/medicines`, medicine);
+  }
+
+  updateMedicine(id: number, medicine: Partial<Medicine>): Observable<Medicine> {
+    return this.http.put<Medicine>(`${this.apiUrl}/medicines/${id}`, medicine);
+  }
+
+  deactivateMedicine(id: number): Observable<Medicine> {
+    return this.http.delete<Medicine>(`${this.apiUrl}/medicines/${id}`);
+  }
+
+  updateStock(medicineId: number, stockQuantity: number): Observable<Medicine> {
+    return this.http.put<Medicine>(`${this.apiUrl}/inventory/${medicineId}/stock`, { stockQuantity });
+  }
+
+  getAllOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}/orders`);
+  }
+
+  updateOrderStatus(id: number, orderStatus: string): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/orders/${id}/status`, { orderStatus });
+  }
+
+  getAllPatients(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/users`);
+  }
+
+  triggerRefillScheduler(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/scheduler/trigger-refill`, {});
+  }
+
+  downloadPrescription(id: number): Observable<Blob> {
+    return this.http.get(`${API_BASE}/prescriptions/${id}`, { responseType: 'blob' });
+  }
+
+  getProcurementAlerts(): Observable<ProcurementAlert[]> {
+    return this.http.get<ProcurementAlert[]>(`${this.apiUrl}/procurement/alerts`);
+  }
+
+  getDeficitSubscriptions(): Observable<DeficitSubscription[]> {
+    return this.http.get<DeficitSubscription[]>(`${this.apiUrl}/procurement/deficits`);
+  }
+
+  restockMedicine(request: RestockRequest): Observable<RestockResponse> {
+    return this.http.post<RestockResponse>(`${this.apiUrl}/procurement/restock`, request);
+  }
+}

@@ -1,0 +1,350 @@
+<div class="container-fluid py-4 px-lg-5">
+  <!-- Top Navigation & Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3 gap-3">
+    <div>
+      <h3 class="fw-bold mb-1 text-dark">
+        <i class="bi bi-boxes text-primary me-2"></i>Warehouse Inventory & Procurement Desk
+      </h3>
+      <p class="text-muted small mb-0">
+        Monitor 5-day soft-locked chronic reserves, track stockout deficits, and execute closed-loop batch restocks.
+      </p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-pills custom-tabs">
+      <li class="nav-item">
+        <button 
+          (click)="switchTab('inventory')" 
+          class="nav-link fw-semibold" 
+          [class.active]="activeTab === 'inventory'">
+          <i class="bi bi-table me-1"></i> Warehouse Stock
+        </button>
+      </li>
+      <li class="nav-item">
+        <button 
+          (click)="switchTab('procurement')" 
+          class="nav-link fw-semibold position-relative" 
+          [class.active]="activeTab === 'procurement'">
+          <i class="bi bi-cart-plus me-1"></i> Reorder & Deficit Queue
+          <span *ngIf="deficitSubscriptions.length > 0 || procurementAlerts.length > 0" 
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ deficitSubscriptions.length + procurementAlerts.length }}
+          </span>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Global Action Feedback Message -->
+  <div *ngIf="message" class="alert alert-success alert-dismissible fade show shadow-sm mb-4">
+    <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+  </div>
+
+  <!-- ================= TAB 1: MAIN WAREHOUSE INVENTORY ================= -->
+  <div *ngIf="activeTab === 'inventory'">
+    <!-- Filter Buttons Toolbar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="text-muted small fw-semibold">
+        Showing {{ filteredMedicines.length }} of {{ medicines.length }} items
+      </span>
+      <div class="btn-group">
+        <button (click)="applyFilter('ALL')" class="btn btn-sm btn-outline-secondary" [class.active]="currentFilter === 'ALL'">All</button>
+        <button (click)="applyFilter('IN_STOCK')" class="btn btn-sm btn-outline-success" [class.active]="currentFilter === 'IN_STOCK'">In Stock</button>
+        <button (click)="applyFilter('LOW_STOCK')" class="btn btn-sm btn-outline-warning text-dark" [class.active]="currentFilter === 'LOW_STOCK'">Low Stock (&le; Threshold)</button>
+        <button (click)="applyFilter('OUT_OF_STOCK')" class="btn btn-sm btn-outline-danger" [class.active]="currentFilter === 'OUT_OF_STOCK'">Out of Stock</button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="text-muted small mt-2">Loading warehouse inventory records...</p>
+    </div>
+
+    <div *ngIf="!loading && filteredMedicines.length > 0" class="card card-pharma p-0 bg-white shadow-sm overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-sticky align-middle table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 70px;">ID</th>
+              <th>Medicine &amp; Brand</th>
+              <th>Composition &amp; Strength</th>
+              <th class="text-end" style="width: 100px;">Price</th>
+              <th class="text-end" style="width: 110px;">Total Stock</th>
+              <th class="text-center" style="width: 130px;">🔒 Soft-Locked</th>
+              <th class="text-center" style="width: 150px;">🟢 Available</th>
+              <th style="width: 120px;">Status</th>
+              <th class="text-end" style="width: 190px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let med of filteredMedicines">
+              <td><span class="cell-id">#{{ med.id }}</span></td>
+              <td>
+                <div class="fw-bold text-dark">{{ med.medicineName }}</div>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary small fw-semibold">{{ med.brandName }}</span>
+              </td>
+              <td>
+                <div class="cell-truncate text-dark small" [title]="med.composition">{{ med.composition }}</div>
+                <div><span class="badge bg-light text-dark border small mt-1">{{ med.strength }}</span></div>
+              </td>
+              <td class="text-end cell-currency">₹{{ med.price }}</td>
+              
+              <!-- Total Physical Stock -->
+              <td class="text-end fw-bold fs-6 tabular-nums">
+                {{ med.stockQuantity }}
+              </td>
+
+              <!-- 5-Day Soft-Locked Subscriptions -->
+              <td class="text-center">
+                <span class="badge rounded-pill px-2 py-1 tabular-nums" [ngClass]="(med.reservedQuantity || 0) > 0 ? 'bg-primary text-white' : 'bg-light text-muted border'">
+                  <i class="bi bi-lock-fill me-1"></i>{{ med.reservedQuantity || 0 }}
+                </span>
+              </td>
+
+              <!-- Available to Sell -->
+              <td class="text-center">
+                <span class="badge rounded-pill fs-6 px-3 py-1 fw-bold tabular-nums" [ngClass]="{
+                  'bg-success text-white': (med.availableQuantity ?? med.stockQuantity) > 10,
+                  'bg-warning text-dark': (med.availableQuantity ?? med.stockQuantity) > 0 && (med.availableQuantity ?? med.stockQuantity) <= 10,
+                  'bg-danger text-white': (med.availableQuantity ?? med.stockQuantity) === 0
+                }">
+                  {{ med.availableQuantity ?? med.stockQuantity }}
+                </span>
+              </td>
+
+              <!-- Status Badge -->
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-success': (med.availableQuantity ?? med.stockQuantity) > 10,
+                  'bg-warning text-dark': (med.availableQuantity ?? med.stockQuantity) > 0 && (med.availableQuantity ?? med.stockQuantity) <= 10,
+                  'bg-danger': (med.availableQuantity ?? med.stockQuantity) === 0
+                }">
+                  {{ (med.availableQuantity ?? med.stockQuantity) === 0 ? 'OUT OF STOCK' : ((med.availableQuantity ?? med.stockQuantity) <= 10 ? 'LOW STOCK' : 'IN STOCK') }}
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td class="cell-actions">
+                <div class="btn-group btn-group-sm">
+                  <button (click)="openRestockModal(med)" class="btn btn-sm btn-outline-primary" title="Replenish batch via FEFO restock">
+                    <i class="bi bi-plus-circle me-1"></i> Restock
+                  </button>
+                  <button (click)="updateStock(med, -1)" class="btn btn-sm btn-outline-secondary" [disabled]="med.stockQuantity <= 0" title="Decrement 1 unit">
+                    -1
+                  </button>
+                  <button (click)="updateStock(med, 1)" class="btn btn-sm btn-outline-secondary" title="Increment 1 unit">
+                    +1
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && filteredMedicines.length === 0" class="text-center py-5">
+      <i class="bi bi-inbox text-muted display-4 mb-3 d-block"></i>
+      <h5 class="text-muted">No medicines found for filter "{{ currentFilter }}".</h5>
+    </div>
+  </div>
+
+  <!-- ================= TAB 2: PROCUREMENT & REORDER QUEUE ================= -->
+  <div *ngIf="activeTab === 'procurement'">
+    <div *ngIf="loadingProcurement" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="text-muted small mt-2">Checking stockout deficits and reorder thresholds...</p>
+    </div>
+
+    <div *ngIf="!loadingProcurement">
+      <!-- Section 1: Active Chronic Care Stockout Deficits -->
+      <div class="card card-pharma p-3 bg-white shadow-sm border-0 mb-4">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+          <div>
+            <h5 class="fw-bold mb-0 text-danger">
+              <i class="bi bi-exclamation-octagon-fill me-2"></i>Active Subscriber Stockout Deficits
+            </h5>
+            <small class="text-muted">Scheduled chronic subscriptions unable to reserve required medication.</small>
+          </div>
+          <span class="badge bg-danger fs-6">{{ deficitSubscriptions.length }} Pending Deficit(s)</span>
+        </div>
+
+        <div *ngIf="deficitSubscriptions.length === 0" class="alert alert-success d-flex align-items-center mb-0">
+          <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+          <div>
+            <strong>All Active Refills Fully Allocated!</strong> Zero patient subscriptions are currently in stockout deficit.
+          </div>
+        </div>
+
+        <div *ngIf="deficitSubscriptions.length > 0" class="table-responsive border-0">
+          <table class="table table-sticky align-middle table-hover mb-0">
+            <thead>
+              <tr>
+                <th style="width: 80px;">Sub ID</th>
+                <th>Patient</th>
+                <th>Prescribed Medicine</th>
+                <th class="text-end" style="width: 140px;">Quantity Needed</th>
+                <th class="text-end" style="width: 140px;">Current Available</th>
+                <th style="width: 150px;">Refill Due</th>
+                <th class="text-end" style="width: 180px;">Procurement Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let def of deficitSubscriptions">
+                <td><span class="cell-id">#{{ def.subscriptionId }}</span></td>
+                <td>
+                  <div class="fw-semibold text-dark">{{ def.patientName }}</div>
+                  <small class="text-muted">{{ def.patientEmail }}</small>
+                </td>
+                <td class="fw-bold text-dark">{{ def.medicineName }}</td>
+                <td class="text-end fw-bold text-danger tabular-nums">{{ def.quantityNeeded }} units</td>
+                <td class="text-end text-muted tabular-nums">{{ def.currentAvailableStock }} units</td>
+                <td>
+                  <span class="badge" [ngClass]="def.daysUntilRefill <= 2 ? 'bg-danger' : 'bg-warning text-dark'">
+                    Due in {{ def.daysUntilRefill }} day(s)
+                  </span>
+                </td>
+                <td class="cell-actions">
+                  <button (click)="openRestockModal({ id: def.medicineId, name: def.medicineName, suggestedReorderPackSize: def.quantityNeeded * 2 })" 
+                          class="btn btn-sm btn-danger fw-semibold">
+                    <i class="bi bi-lightning-fill me-1"></i> Restock &amp; Fulfill
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Reorder & Procurement Alerts -->
+      <div class="card card-pharma p-0 bg-white shadow-sm overflow-hidden">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="fw-bold mb-0 text-dark">
+              <i class="bi bi-bell-fill text-warning me-2"></i>Procurement Reorder Alerts
+            </h5>
+            <small class="text-muted">Medicines at or below threshold (&le; Reorder Limit).</small>
+          </div>
+          <span class="badge bg-warning text-dark fs-6 tabular-nums">{{ procurementAlerts.length }} Item(s) to Restock</span>
+        </div>
+
+        <div *ngIf="procurementAlerts.length === 0" class="text-center py-4">
+          <i class="bi bi-check-all text-success display-4 mb-2 d-block"></i>
+          <p class="text-muted mb-0">All medicine inventory levels are healthy and above their reorder thresholds.</p>
+        </div>
+
+        <div *ngIf="procurementAlerts.length > 0" class="table-responsive border-0">
+          <table class="table table-sticky align-middle table-hover mb-0">
+            <thead>
+              <tr>
+                <th style="width: 140px;">Urgency</th>
+                <th>Medicine &amp; Brand</th>
+                <th>Composition &amp; Strength</th>
+                <th class="text-end" style="width: 120px;">Available Stock</th>
+                <th class="text-end" style="width: 110px;">Threshold</th>
+                <th class="text-end" style="width: 130px;">Suggested Pack</th>
+                <th class="text-center" style="width: 120px;">Waiting Deficits</th>
+                <th class="text-end" style="width: 160px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let alert of procurementAlerts">
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-danger': alert.urgency === 'CRITICAL_STOCKOUT',
+                    'bg-warning text-dark': alert.urgency === 'DEFICIT_QUEUED',
+                    'bg-info text-dark': alert.urgency === 'LOW_STOCK'
+                  }">
+                    {{ alert.urgency === 'CRITICAL_STOCKOUT' ? 'CRITICAL OUT' : (alert.urgency === 'DEFICIT_QUEUED' ? 'DEFICIT QUEUED' : 'LOW STOCK') }}
+                  </span>
+                </td>
+                <td>
+                  <div class="fw-bold text-dark">{{ alert.medicineName }}</div>
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary small fw-semibold">{{ alert.brandName }}</span>
+                </td>
+                <td>
+                  <div class="cell-truncate text-dark small" [title]="alert.composition">{{ alert.composition }}</div>
+                  <div><span class="badge bg-light text-dark border small mt-1">{{ alert.strength }}</span></div>
+                </td>
+                <td class="text-end fw-bold text-danger tabular-nums">{{ alert.availableQuantity }}</td>
+                <td class="text-end text-muted tabular-nums">{{ alert.reorderThreshold }}</td>
+                <td class="text-end fw-bold text-primary tabular-nums">{{ alert.suggestedReorderPackSize }} units</td>
+                <td class="text-center">
+                  <span class="badge tabular-nums" [ngClass]="alert.deficitSubscriptionsCount > 0 ? 'bg-danger' : 'bg-light text-muted'">
+                    {{ alert.deficitSubscriptionsCount }}
+                  </span>
+                </td>
+                <td class="cell-actions">
+                  <button (click)="openRestockModal(alert)" class="btn btn-sm btn-outline-success fw-semibold">
+                    <i class="bi bi-box-arrow-in-down me-1"></i> Restock ({{ alert.suggestedReorderPackSize }})
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 1-CLICK BATCH RESTOCK MODAL ================= -->
+  <div *ngIf="isRestockModalOpen" class="modal-backdrop fade show"></div>
+  <div *ngIf="isRestockModalOpen" class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow border-0">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title fw-bold text-white">
+            <i class="bi bi-box-seam me-2"></i>Batch Inventory Restock (FEFO)
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeRestockModal()"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <div *ngIf="selectedMedForRestock" class="mb-3 p-3 bg-light rounded border">
+            <div class="text-muted small">Target Medicine:</div>
+            <h6 class="fw-bold text-dark mb-0">{{ selectedMedForRestock.name }}</h6>
+            <small *ngIf="selectedMedForRestock.brand" class="text-secondary">{{ selectedMedForRestock.brand }}</small>
+          </div>
+
+          <div *ngIf="restockFeedback" class="alert alert-danger small mb-3">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ restockFeedback }}
+          </div>
+
+          <!-- Quantity Input -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Restock Quantity (Units):</label>
+            <input type="number" class="form-control" [(ngModel)]="restockQuantity" min="1" placeholder="e.g. 50">
+            <small class="text-muted">Suggested standard pack size: {{ selectedMedForRestock?.suggestedPack || 50 }} units.</small>
+          </div>
+
+          <!-- Batch Number Input -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Manufacturer Batch Number:</label>
+            <input type="text" class="form-control" [(ngModel)]="restockBatchNumber" placeholder="e.g. BATCH-2026-A1">
+          </div>
+
+          <!-- Expiry Date Input (FEFO) -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Batch Expiry Date (FEFO Compliance):</label>
+            <input type="date" class="form-control" [(ngModel)]="restockExpiryDate">
+            <small class="text-muted">Enforces First-Expired, First-Out clinical dispensing rules.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" (click)="closeRestockModal()" [disabled]="restockLoading">
+            Cancel
+          </button>
+          <button type="button" 
+                  class="btn btn-primary fw-semibold" 
+                  (click)="submitRestock()" 
+                  [disabled]="restockLoading || restockQuantity <= 0"
+                  [class.btn-submitting]="restockLoading">
+            <span *ngIf="restockLoading" class="spinner-border spinner-border-sm me-1"></span>
+            {{ restockLoading ? 'Allocating & Restocking...' : 'Confirm & Fulfill Queue' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

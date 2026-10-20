@@ -1,0 +1,24 @@
+package com.automeds.repository;
+
+import com.automeds.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+/**
+ * // EDUCATIONAL CODE EXPLANATION
+ * Class: UserRepository
+ * Description: Application component class containing configuration, exceptions, or scheduling logic.
+ */
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+    boolean existsByEmail(String email);
+    List<User> findByRole(String role);
+    List<User> findByRoleIn(List<String> roles);
+
+    /** Find a user by their phone number — used by WhatsApp/SMS command gateway lookup. */
+    java.util.Optional<User> findByPhone(String phone);
+}

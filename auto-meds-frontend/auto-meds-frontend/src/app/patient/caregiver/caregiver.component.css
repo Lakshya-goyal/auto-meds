@@ -1,0 +1,1208 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   Caregiver Management Page — Phase 6
+   Premium glassmorphism design with purple/teal gradient theme
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.caregiver-page {
+  padding: 28px 32px;
+  max-width: 960px;
+  margin: 0 auto;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ── Page Header ─────────────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #6C63FF, #48CAE4);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+.header-subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-invite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #6C63FF, #48CAE4);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(108, 99, 255, 0.35);
+}
+
+.btn-invite:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.45);
+}
+
+/* ── Alerts ──────────────────────────────────────────────────────────────── */
+.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.alert-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.alert-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.6;
+  color: inherit;
+}
+
+/* ── Invite Panel ────────────────────────────────────────────────────────── */
+.invite-panel {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  animation: slideIn 0.3s ease;
+}
+
+.invite-panel-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 6px;
+}
+
+.invite-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0 0 20px;
+}
+
+.invite-form {}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.required { color: #ef4444; }
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+  background: #fafafa;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #6C63FF;
+  background: white;
+}
+
+.form-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 5px;
+}
+
+.invite-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-cancel {
+  padding: 9px 20px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #6b7280;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.btn-send {
+  padding: 9px 24px;
+  background: linear-gradient(135deg, #6C63FF, #48CAE4);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-send:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.loading-dots span {
+  animation: blink 1.2s infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}
+
+/* ── Tab Bar ─────────────────────────────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 5px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.tab-btn.active {
+  background: white;
+  color: #6C63FF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-badge {
+  background: #6C63FF;
+  color: white;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ── Cards Grid ──────────────────────────────────────────────────────────── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+/* ── Caregiver Card ──────────────────────────────────────────────────────── */
+.caregiver-card, .patient-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.caregiver-card:hover, .patient-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6C63FF, #48CAE4);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.avatar-patient {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-info h4 {
+  margin: 0 0 3px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.card-email {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin: 0 0 2px;
+}
+
+.card-relation {
+  color: #9ca3af;
+  font-size: 0.78rem;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Status Badge ────────────────────────────────────────────────────────── */
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.status-active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-revoked {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Permission Tags ─────────────────────────────────────────────────────── */
+.permission-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.perm-tag {
+  background: #f0f0ff;
+  color: #6C63FF;
+  border: 1px solid #d8d6ff;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ── Card Dates ──────────────────────────────────────────────────────────── */
+.card-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.date-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #9ca3af;
+  font-size: 0.78rem;
+}
+
+/* ── Card Actions ────────────────────────────────────────────────────────── */
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-sm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-accept {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.btn-accept:hover:not(:disabled) {
+  background: #a7f3d0;
+}
+
+.btn-revoke {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-revoke:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+.revoked-note {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* ── WhatsApp Hint ───────────────────────────────────────────────────────── */
+.whatsapp-hint {
+  display: flex;
+  gap: 12px;
+  background: #f0fff4;
+  border: 1px solid #86efac;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+
+.wa-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.wa-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #166534;
+  margin: 0 0 3px;
+}
+
+.wa-desc {
+  font-size: 0.78rem;
+  color: #4ade80;
+  color: #15803d;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Empty & Loading States ──────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  background: white;
+  border: 2px dashed #e5e7eb;
+  border-radius: 16px;
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 12px;
+}
+
+.empty-state h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px;
+}
+
+.empty-state p {
+  color: #6b7280;
+  font-size: 0.9rem;
+  max-width: 400px;
+  margin: 0 auto 20px;
+  line-height: 1.5;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6C63FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+/* ── Info Panel (WhatsApp Commands) ──────────────────────────────────────── */
+.info-panel {
+  margin-top: 36px;
+  background: linear-gradient(135deg, #f0f0ff, #f0fffe);
+  border: 1px solid #d8d6ff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.info-panel h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px;
+}
+
+.info-panel > p {
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin: 0 0 18px;
+}
+
+.command-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.command-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.command-word {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #6C63FF;
+  background: #f0f0ff;
+  padding: 3px 8px;
+  border-radius: 5px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.command-desc {
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(108, 99, 255, 0); }
+}
+
+/* ── Pending Hero Banner (Caregiver Inbound Inbox) ───────────────────────── */
+.pending-hero-banner {
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.95), rgba(240, 253, 250, 0.95));
+  border: 2px solid #818cf8;
+  border-radius: 18px;
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+  animation: slideIn 0.35s ease;
+}
+
+.pending-hero-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.bell-glow {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  animation: pulseGlow 2s infinite;
+  flex-shrink: 0;
+}
+
+.pending-hero-header h3 {
+  margin: 0 0 3px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e1b4b;
+}
+
+.pending-hero-header p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.pending-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pending-card {
+  background: white;
+  border: 1px solid #c7d2fe;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.pending-card-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.patient-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.patient-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.patient-email {
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.relationship-callout {
+  margin: 0 0 8px;
+  font-size: 0.87rem;
+  color: #374151;
+}
+
+.relationship-callout strong {
+  color: #4338ca;
+}
+
+.invited-date-stamp {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.pending-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-accept-hero {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-accept-hero:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+}
+
+.btn-decline-hero {
+  background: transparent;
+  color: #6b7280;
+  border: 1.5px solid #d1d5db;
+  border-radius: 9px;
+  padding: 9px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-decline-hero:hover:not(:disabled) {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fef2f2;
+}
+
+/* ── Tab Badge Pending ───────────────────────────────────────────────────── */
+.tab-badge-pending {
+  background: #ef4444;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  animation: pulseGlow 1.5s infinite;
+}
+
+/* ── Pending Notice Box (Inside Caregiver Card for Patient) ─────────────── */
+.pending-notice-box {
+  background: #fffbeb;
+  border: 1px dashed #f59e0b;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.notice-text {
+  font-size: 0.82rem;
+  color: #92400e;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copy-link-row {
+  display: flex;
+}
+
+.btn-copy-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1.5px solid #d97706;
+  color: #b45309;
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy-link:hover {
+  background: #fef3c7;
+}
+
+.copied-check {
+  color: #059669;
+  font-weight: 700;
+}
+
+/* ── Delegated Patient Orders Section ───────────────────────────────────── */
+.patient-orders-section {
+  margin-top: 14px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+
+.btn-toggle-orders {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-toggle-orders:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.orders-dropdown {
+  margin-top: 10px;
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.orders-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  justify-content: center;
+  padding: 10px;
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #6C63FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.no-orders-msg {
+  font-size: 0.8rem;
+  color: #059669;
+  text-align: center;
+  padding: 8px;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-mini-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.order-mini-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.order-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.order-badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.68rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.order-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.btn-pay-proxy {
+  background: linear-gradient(135deg, #6C63FF, #48CAE4);
+  color: white;
+  border: none;
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.btn-pay-proxy:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ── Interactive WhatsApp Simulator Console ────────────────────────────── */
+.simulator-panel {
+  margin-top: 24px;
+  background: white;
+  border: 1px solid #d1fae5;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
+}
+
+.simulator-header {
+  margin-bottom: 16px;
+}
+
+.sim-badge {
+  display: inline-block;
+  background: #10b981;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.simulator-header h4 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #064e3b;
+}
+
+.simulator-header p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.sim-phone-screen {
+  background: #efeae2;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sim-screen-header {
+  background: #075e54;
+  color: white;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sim-avatar {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.sim-contact {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sim-contact strong {
+  font-size: 0.88rem;
+}
+
+.sim-contact span {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.btn-clear-chat {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-clear-chat:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.sim-chat-area {
+  padding: 16px;
+  min-height: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-image: radial-gradient(#d4cdc5 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.chat-bubble {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre-line;
+  word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.bubble-user {
+  align-self: flex-end;
+  background: #d9fdd3;
+  color: #111b21;
+  border-top-right-radius: 0;
+}
+
+.bubble-bot {
+  align-self: flex-start;
+  background: white;
+  color: #111b21;
+  border-top-left-radius: 0;
+}
+
+.bubble-time {
+  font-size: 0.65rem;
+  color: #667781;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.bubble-typing {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  padding: 6px 12px;
+}
+
+.typing-dot {
+  font-size: 1.5rem;
+  line-height: 0.5;
+  animation: blink 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+.sim-controls {
+  background: #f0f2f5;
+  border-top: 1px solid #d1d5db;
+  padding: 12px 14px;
+}
+
+.sim-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sim-field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4b5563;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.sim-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  box-sizing: border-box;
+}
+
+.quick-cmd-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-cmd {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-cmd:hover {
+  background: #e5e7eb;
+}
+
+.active-cmd {
+  background: #075e54;
+  color: white;
+  border-color: #075e54;
+}
+
+.sim-send-row {
+  display: flex;
+  gap: 8px;
+}
+
+.sim-input-cmd {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.sim-input-cmd:focus, .sim-input:focus {
+  outline: none;
+  border-color: #075e54;
+}
+
+.btn-sim-send {
+  background: #075e54;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-sim-send:hover:not(:disabled) {
+  background: #128c7e;
+}
+
+.btn-sim-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .caregiver-page { padding: 16px; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .form-row { grid-template-columns: 1fr; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .command-grid { grid-template-columns: 1fr 1fr; }
+  .tab-bar { width: 100%; }
+  .tab-btn { flex: 1; justify-content: center; }
+  .pending-card { flex-direction: column; align-items: flex-start; }
+  .pending-actions { width: 100%; justify-content: flex-end; }
+  .sim-row { grid-template-columns: 1fr; }
+}
+
